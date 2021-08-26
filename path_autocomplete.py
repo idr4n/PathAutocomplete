@@ -70,7 +70,6 @@ class PathCompletions(sublime_plugin.ViewEventListener):
                     or os.path.dirname(path)):
                 if os.path.dirname(path):
                     path = os.path.dirname(path)
-                # print("yes, is dir")
                 try:
                     dirs = os.listdir(path)
                     self.paths = sorted(dirs)
