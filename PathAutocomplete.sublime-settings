@@ -1,0 +1,6 @@
+{
+  // Scope triggers. When there is a syntax scope detected, this plugin will
+  // start listening for changes only when one of the following triggers is
+  // typed:
+  "triggers": ["'", "\""],
+}
