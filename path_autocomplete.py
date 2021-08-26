@@ -13,7 +13,7 @@ def plugin_loaded():
 
 
 def debug(var, message=''):
-    print('Path Debug - %s: %s' % (message, var))
+    print('PathAutocomplete Debug - %s: %s' % (message, var))
 
 
 def resolve_path(view, path: str):
@@ -45,44 +45,26 @@ def path_type(dirname, basename):
         return 'path'
 
 
-# def find_region(regions: list, cursor_pos):
-#     for region in regions:
-#         if region.contains(cursor_pos):
-#             return region
-
-
 class PathCompletions(sublime_plugin.ViewEventListener):
     paths = []
     dirname = ''
 
     def on_modified_async(self):
-        # triggers = ["'", '"']
         triggers = s.get('triggers')
         region = self.view.extract_scope(self.view.sel()[0].a-1)
         region_str = self.view.substr(region)
         quote_type = '"'
-
-        # # line = self.view.line(self.view.sel()[0]).a
-        # inquotes = self.view.find_all(r'"(.*?)"')
-        # if inquotes:
-        #     # debug(inquotes, 'inquotes')
-        #     # debug(self.view.sel()[0], 'cursor')
-        #     found_region = find_region(inquotes, self.view.sel()[0])
-        #     if found_region:
-        #         debug(self.view.substr(found_region))
 
         if region_str and region_str[0] in triggers:
             quote_type = region_str[0]
 
             split = '%s' % quote_type
             path = self.view.substr(region).split(split)[1].strip("'\"")
-            debug(self.view.substr(region).split('"'), 'the path is')
             path = os.path.expanduser(path)
 
             if (path.startswith(".%s" % os.sep)
                     or path.startswith("..%s" % os.sep)):
                 path = resolve_path(self.view, path)
-                # print('path is...', path)
 
             if ((os.path.isdir(path) and path.endswith(os.sep))
                     or os.path.dirname(path)):
@@ -100,10 +82,6 @@ class PathCompletions(sublime_plugin.ViewEventListener):
             self.paths = []
 
     def on_query_completions(self, prefix, locations):
-        # if not self.view.match_selector(locations[0], "source.python"):
-        #     return []
-        # print(self.paths)
 
-        # return list(map(add_info, self.paths))
         return ["%s\t%s" % (path, path_type(self.dirname, path))
                 for path in self.paths]
