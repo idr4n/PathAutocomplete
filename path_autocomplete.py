@@ -72,7 +72,8 @@ class PathCompletions(sublime_plugin.ViewEventListener):
             quote_type = region_str[0]
 
             split = '%s' % quote_type
-            path = self.view.substr(region).split(split)[1].strip("'\"")
+            path = self.view.substr(region).split(
+                split)[1].strip(''.join(triggers))
             path = os.path.expanduser(path)
 
             if (path.startswith(".%s" % os.sep)
