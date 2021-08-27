@@ -13,7 +13,7 @@ def plugin_loaded():
 
 
 def debug(var, message=''):
-    print('PathAutocomplete Debug - %s: %s' % (message, var))
+    print('Path Debug - %s: %s' % (message, var))
 
 
 def resolve_path(view, path: str):
@@ -28,12 +28,25 @@ def resolve_path(view, path: str):
     if path.startswith("..%s" % os.sep):
         num_parents = len(path.split('../')) - 1
         parent_path = os.path.dirname(dirname)
-        for i in range(1, num_parents):
+        for _ in range(1, num_parents):
             parent_path = os.path.dirname(parent_path)
 
         regex = r"^(\.\.%s){1,}" % os.sep
         match = re.match(regex, path).group(0)
         return path.replace(match, parent_path + os.sep)
+
+
+def completion_item(dirname: str, basename: str):
+    details = '''
+    <i>In: <a href="">%s</a></i>
+    ''' % (dirname)
+
+    return sublime.CompletionItem(
+        basename,
+        annotation=path_type(dirname, basename),
+        kind=(sublime.KIND_ID_SNIPPET, 'p', 'Path'),
+        details=details
+    )
 
 
 def path_type(dirname, basename):
@@ -81,6 +94,11 @@ class PathCompletions(sublime_plugin.ViewEventListener):
             self.paths = []
 
     def on_query_completions(self, prefix, locations):
+        if sublime.version() < '4050':
+            return ["%s\t%s" % (path, path_type(self.dirname, path))
+                    for path in self.paths]
+        else:
+            pathslist = [completion_item(self.dirname, path)
+                         for path in self.paths]
 
-        return ["%s\t%s" % (path, path_type(self.dirname, path))
-                for path in self.paths]
+            return sublime.CompletionList(pathslist)
